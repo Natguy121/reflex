@@ -161,6 +161,15 @@ button { font-family: inherit; }
 
 .overlay-note { margin-top: 14px; color: var(--muted); font-size: 0.85rem; text-align: center; max-width: 640px; }
 
+#replayVideo {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  z-index: 40; background: #000; object-fit: contain;
+}
+#replayCloseBtn {
+  position: absolute; top: 14px; right: 14px; z-index: 41;
+  padding: 0.4em 0.9em; font-size: 0.85rem;
+}
+
 .loading-dots::after { content: ''; animation: dots 1.2s steps(4, end) infinite; }
 @keyframes dots { 0% { content: ''; } 25% { content: '.'; } 50% { content: '..'; } 75% { content: '...'; } 100% { content: ''; } }
 
@@ -241,6 +250,9 @@ button { font-family: inherit; }
       </div>
 
       <div class="center-msg" id="centerMsg"></div>
+
+      <video id="replayVideo" class="hidden" playsinline controls></video>
+      <button class="btn ghost hidden" id="replayCloseBtn" type="button">✕</button>
 
       <video id="video" autoplay playsinline muted style="display:none"></video>
     </div>
@@ -440,6 +452,7 @@ button { font-family: inherit; }
       wonBig: "GAGNÉ !",
       wonLabel: "10 manches survécues 🎉",
       retryRound: (r) => `Rejouer la manche ${r}`,
+      watchReplay: "▶ Revoir la manche",
       home: "Accueil",
       safetyNoBody: "Placement caméra : montre-toi entièrement à la caméra pour continuer",
       safetyPartial: "Recule-toi : montre tout ton corps (tête + pieds) à la caméra pour continuer",
@@ -478,6 +491,7 @@ button { font-family: inherit; }
       wonBig: "WON!",
       wonLabel: "Survived 10 rounds 🎉",
       retryRound: (r) => `Replay round ${r}`,
+      watchReplay: "▶ Watch replay",
       home: "Home",
       safetyNoBody: "Camera framing: show your whole body to the camera to continue",
       safetyPartial: "Step back: show your whole body (head + feet) to the camera to continue",
@@ -519,8 +533,81 @@ button { font-family: inherit; }
   const blueCardTitle = document.getElementById("blueCardTitle");
   const blueCardDesc = document.getElementById("blueCardDesc");
   const blueCardBtn = document.getElementById("blueCardBtn");
+  const replayVideo = document.getElementById("replayVideo");
+  const replayCloseBtn = document.getElementById("replayCloseBtn");
 
   const engine = new PoseEngine();
+
+  // ===================== Round replay recording =====================
+  // Records the canvas (video + shapes) for the round currently in play, so
+  // the player can watch back exactly how they won or lost it. Only the
+  // most recently finished round's recording is kept.
+  const recordingSupported = typeof MediaRecorder !== "undefined" && typeof canvas.captureStream === "function";
+  let mediaRecorder = null;
+  let recordedChunks = [];
+  let lastReplayUrl = null;
+
+  function pickReplayMimeType() {
+    const candidates = ["video/webm;codecs=vp9", "video/webm;codecs=vp8", "video/webm"];
+    for (const c of candidates) {
+      if (MediaRecorder.isTypeSupported(c)) return c;
+    }
+    return "";
+  }
+
+  function startRoundRecording() {
+    if (!recordingSupported) return;
+    try {
+      const stream = canvas.captureStream(30);
+      const mimeType = pickReplayMimeType();
+      mediaRecorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+      recordedChunks = [];
+      mediaRecorder.ondataavailable = (e) => { if (e.data && e.data.size > 0) recordedChunks.push(e.data); };
+      mediaRecorder.start();
+    } catch (err) {
+      mediaRecorder = null;
+    }
+  }
+
+  function stopRoundRecording() {
+    return new Promise((resolve) => {
+      if (!recordingSupported || !mediaRecorder || mediaRecorder.state === "inactive") { resolve(); return; }
+      mediaRecorder.addEventListener("stop", () => {
+        if (recordedChunks.length > 0) {
+          const blob = new Blob(recordedChunks, { type: mediaRecorder.mimeType || "video/webm" });
+          if (lastReplayUrl) URL.revokeObjectURL(lastReplayUrl);
+          lastReplayUrl = URL.createObjectURL(blob);
+        }
+        resolve();
+      }, { once: true });
+      try { mediaRecorder.stop(); } catch (err) { resolve(); }
+    });
+  }
+
+  function discardReplay() {
+    if (mediaRecorder && mediaRecorder.state !== "inactive") { try { mediaRecorder.stop(); } catch (err) {} }
+    if (lastReplayUrl) { URL.revokeObjectURL(lastReplayUrl); lastReplayUrl = null; }
+    closeReplay();
+  }
+
+  function openReplay() {
+    if (!lastReplayUrl) return;
+    replayVideo.src = lastReplayUrl;
+    replayVideo.classList.remove("hidden");
+    replayCloseBtn.classList.remove("hidden");
+    replayVideo.currentTime = 0;
+    replayVideo.play().catch(() => {});
+  }
+
+  function closeReplay() {
+    replayVideo.pause();
+    replayVideo.removeAttribute("src");
+    replayVideo.load();
+    replayVideo.classList.add("hidden");
+    replayCloseBtn.classList.add("hidden");
+  }
+
+  replayCloseBtn.addEventListener("click", closeReplay);
 
   let currentMode = null; // 'red' | 'blue'
   // title | loading | positioning | intro | go | active | success | lost | won
@@ -636,6 +723,7 @@ button { font-family: inherit; }
     langToggle.classList.remove("hidden");
     safetyBanner.classList.add("hidden");
     clearCenterMsg();
+    discardReplay();
   }
 
   function startPositioning() {
@@ -764,26 +852,31 @@ button { font-family: inherit; }
     phase = "active";
     clearCenterMsg();
     roundPill.textContent = t().roundLabel(r, TOTAL_ROUNDS);
+    startRoundRecording();
   }
 
-  function onRoundSuccess() {
+  async function onRoundSuccess() {
     phase = "success";
     pauseStartTime = performance.now();
     const label = currentMode === "blue" ? t().roundSuccessBlue(round) : t().roundSuccessRed(round);
     setCenterMsg(`<div class="label" style="color:#29f5e6;">${label}</div>`);
+    await stopRoundRecording();
   }
 
-  function onLose() {
+  async function onLose() {
     phase = "lost";
     if (rafId) cancelAnimationFrame(rafId);
     safetyBanner.classList.add("hidden");
+    await stopRoundRecording();
     const sub = currentMode === "blue" ? t().lostSubBlue : t().lostSubRed;
+    const replayBtnHtml = lastReplayUrl ? `<button class="btn ghost" id="replayBtn">${t().watchReplay}</button>` : "";
     setCenterMsg(`
       <div class="big" style="color:#ff4b4b;">${t().lostBig}</div>
       <div class="label">${t().roundLabel(round, TOTAL_ROUNDS)}</div>
       <div class="sub">${sub}</div>
       <div class="actions">
         <button class="btn" id="retryBtn">${t().retryRound(round)}</button>
+        ${replayBtnHtml}
         <button class="btn ghost" id="homeBtn">${t().home}</button>
       </div>
     `);
@@ -791,15 +884,18 @@ button { font-family: inherit; }
     drawStaticLoop();
   }
 
-  function onWin() {
+  async function onWin() {
     phase = "won";
     if (rafId) cancelAnimationFrame(rafId);
     safetyBanner.classList.add("hidden");
+    await stopRoundRecording();
+    const replayBtnHtml = lastReplayUrl ? `<button class="btn ghost" id="replayBtn">${t().watchReplay}</button>` : "";
     setCenterMsg(`
       <div class="big" style="color:#3dffa0;">${t().wonBig}</div>
       <div class="label">${t().wonLabel}</div>
       <div class="actions">
         <button class="btn" id="retryBtn">${t().retryRound(round)}</button>
+        ${replayBtnHtml}
         <button class="btn ghost" id="homeBtn">${t().home}</button>
       </div>
     `);
@@ -809,8 +905,10 @@ button { font-family: inherit; }
 
   function wireEndButtons() {
     const retryBtn = document.getElementById("retryBtn");
+    const replayBtn = document.getElementById("replayBtn");
     const homeBtn = document.getElementById("homeBtn");
     if (retryBtn) retryBtn.addEventListener("click", () => {
+      closeReplay();
       pendingStartRound = round; // replay only the round just lost/won, not the whole run
       timerPill.textContent = "⏱ --";
       roundPill.textContent = t().roundLabel(pendingStartRound, TOTAL_ROUNDS);
@@ -820,6 +918,7 @@ button { font-family: inherit; }
       beginRun();
       rafId = requestAnimationFrame(frame);
     });
+    if (replayBtn) replayBtn.addEventListener("click", openReplay);
     if (homeBtn) homeBtn.addEventListener("click", goToTitle);
   }
 
