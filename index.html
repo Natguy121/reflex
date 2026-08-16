@@ -451,7 +451,7 @@ button { font-family: inherit; }
       lostSubRed: "Le scan t'a surpris dans un cercle rouge pile quand le temps est tombé à zéro.",
       wonBig: "GAGNÉ !",
       wonLabel: "10 manches survécues 🎉",
-      retryRound: (r) => `Rejouer la manche ${r}`,
+      retry: "Rejouer",
       watchReplay: "▶ Revoir la manche",
       home: "Accueil",
       safetyNoBody: "Placement caméra : montre-toi entièrement à la caméra pour continuer",
@@ -490,7 +490,7 @@ button { font-family: inherit; }
       lostSubRed: "The scan caught you inside a red circle right as time hit zero.",
       wonBig: "WON!",
       wonLabel: "Survived 10 rounds 🎉",
-      retryRound: (r) => `Replay round ${r}`,
+      retry: "Replay",
       watchReplay: "▶ Watch replay",
       home: "Home",
       safetyNoBody: "Camera framing: show your whole body to the camera to continue",
@@ -875,7 +875,7 @@ button { font-family: inherit; }
       <div class="label">${t().roundLabel(round, TOTAL_ROUNDS)}</div>
       <div class="sub">${sub}</div>
       <div class="actions">
-        <button class="btn" id="retryBtn">${t().retryRound(round)}</button>
+        <button class="btn" id="retryBtn">${t().retry}</button>
         ${replayBtnHtml}
         <button class="btn ghost" id="homeBtn">${t().home}</button>
       </div>
@@ -894,7 +894,7 @@ button { font-family: inherit; }
       <div class="big" style="color:#3dffa0;">${t().wonBig}</div>
       <div class="label">${t().wonLabel}</div>
       <div class="actions">
-        <button class="btn" id="retryBtn">${t().retryRound(round)}</button>
+        <button class="btn" id="retryBtn">${t().retry}</button>
         ${replayBtnHtml}
         <button class="btn ghost" id="homeBtn">${t().home}</button>
       </div>
