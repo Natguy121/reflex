@@ -452,6 +452,7 @@ button { font-family: inherit; }
       wonBig: "GAGNÉ !",
       wonLabel: "10 manches survécues 🎉",
       retry: "Rejouer",
+      continueBtn: "Continuer",
       watchReplay: "▶ Revoir la manche",
       home: "Accueil",
       safetyNoBody: "Placement caméra : montre-toi entièrement à la caméra pour continuer",
@@ -491,6 +492,7 @@ button { font-family: inherit; }
       wonBig: "WON!",
       wonLabel: "Survived 10 rounds 🎉",
       retry: "Replay",
+      continueBtn: "Continue",
       watchReplay: "▶ Watch replay",
       home: "Home",
       safetyNoBody: "Camera framing: show your whole body to the camera to continue",
@@ -875,9 +877,8 @@ button { font-family: inherit; }
       <div class="label">${t().roundLabel(round, TOTAL_ROUNDS)}</div>
       <div class="sub">${sub}</div>
       <div class="actions">
-        <button class="btn" id="retryBtn">${t().retry}</button>
+        <button class="btn" id="retryBtn">${t().continueBtn}</button>
         ${replayBtnHtml}
-        <button class="btn ghost" id="homeBtn">${t().home}</button>
       </div>
     `);
     wireEndButtons();
