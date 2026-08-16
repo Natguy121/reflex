@@ -410,11 +410,11 @@ button { font-family: inherit; }
       onTouch: "win-round",
       difficulty(r) {
         return {
-          durationMs: clamp(3600 - (r - 1) * 220, 1500, 3600),
-          radiusFrac: clamp(0.17 - (r - 1) * 0.009, 0.075, 0.17),
-          moving: r >= 6,
-          speed: r >= 6 ? 45 + (r - 6) * 16 : 0,
-          bias: 0.9, // spot the player and place the circle far away, every round
+          durationMs: clamp(2600 - (r - 1) * 200, 900, 2600),
+          radiusFrac: clamp(0.13 - (r - 1) * 0.008, 0.05, 0.13),
+          moving: true, // moves from round 1, no warm-up
+          speed: 75 + (r - 1) * 14,
+          bias: 0.97, // spot the player and place the circle as far away as possible, every round
           biasDir: "away",
           fairnessClearance: false,
         };
@@ -460,7 +460,7 @@ button { font-family: inherit; }
       redGameTitle: "🔴 Cercle Rouge",
       redNote: "Le cercle apparaît directement sur toi — au moment exact où son compte à rebours atteint zéro, un scan vérifie si tu es toujours dedans. Bouge avant la fin ! À partir de la manche 6, des petits cercles supplémentaires apparaissent aussi. Ce jeu ne se met jamais en pause, même si tu sors du cadre.",
       blueGameTitle: "🔵 Cercle Bleu",
-      blueNote: "Le cercle apparaît loin de toi — cours le toucher avec n'importe quelle partie de ton corps avant la fin du compte à rebours. Il rétrécit et le temps se réduit à chaque manche.",
+      blueNote: "Le cercle apparaît loin de toi et se déplace dès la première manche — cours le toucher avec n'importe quelle partie de ton corps avant la fin du compte à rebours. Il rétrécit, va de plus en plus vite, et le temps se réduit à chaque manche.",
       camAccessError: "Impossible d'accéder à la caméra. Vérifie que tu as autorisé l'accès à la webcam pour cette page.",
       modelLoadError: "Impossible de charger le modèle de détection (connexion internet requise au premier lancement).",
     },
@@ -500,7 +500,7 @@ button { font-family: inherit; }
       redGameTitle: "🔴 Red Circle",
       redNote: "The circle appears right on top of you — the instant its countdown hits zero, a scan checks whether you're still inside it. Move before time's up! From round 6 onward, extra small circles appear too. This game never pauses, even if you step out of frame.",
       blueGameTitle: "🔵 Blue Circle",
-      blueNote: "The circle appears far from you — run and touch it with any part of your body before the countdown ends. It shrinks and the time shortens each round.",
+      blueNote: "The circle appears far from you and moves from round one — run and touch it with any part of your body before the countdown ends. It shrinks, speeds up, and the time shortens each round.",
       camAccessError: "Couldn't access the camera. Make sure you've allowed webcam access for this page.",
       modelLoadError: "Couldn't load the detection model (an internet connection is required on first launch).",
     },
@@ -761,7 +761,7 @@ button { font-family: inherit; }
         x = x + (bx - x) * d.bias;
         y = y + (by - y) * d.bias;
       } else {
-        const desiredMinDist = d.bias * (minDim * 0.55);
+        const desiredMinDist = d.bias * (minDim * 0.7);
         const dx = x - bodyCenter.x, dy = y - bodyCenter.y;
         const dist = Math.hypot(dx, dy);
         if (dist < desiredMinDist) {
