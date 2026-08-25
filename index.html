@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>REFLEX</title>
+<style>
+:root {
+  --bg: #060812;
+  --panel: #0d1120;
+  --cyan: #29f5e6;
+  --magenta: #ff2ea6;
+  --yellow: #ffd23f;
+  --orange: #ff9a3c;
+  --red: #ff4b4b;
+  --green: #3dffa0;
+  --text: #eaf6ff;
+  --muted: #8ea0c0;
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Segoe UI', 'Trebuchet MS', system-ui, -apple-system, sans-serif;
+  min-height: 100%;
+  overflow-x: hidden;
+}
+body {
+  background:
+    radial-gradient(circle at 20% 10%, rgba(41,245,230,0.10), transparent 40%),
+    radial-gradient(circle at 80% 90%, rgba(255,46,166,0.12), transparent 45%),
+    var(--bg);
+}
+button { font-family: inherit; }
+.neon-title {
+  font-size: clamp(2.6rem, 8vw, 5rem);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-align: center;
+  margin: 0;
+  color: var(--cyan);
+  text-shadow: 0 0 6px rgba(41,245,230,0.9), 0 0 22px rgba(41,245,230,0.6), 0 0 46px rgba(255,46,166,0.35);
+}
+.subtitle { text-align: center; color: var(--muted); font-size: clamp(0.95rem, 2vw, 1.1rem); margin: 0.4em 0 1em; max-width: 560px; line-height: 1.6; }
+
+.privacy-badge {
+  display: flex; align-items: center; gap: 0.7em;
+  max-width: 560px; margin: 0 auto 1.8em;
+  padding: 0.8em 1.2em; border-radius: 16px;
+  background: rgba(61,255,160,0.08); border: 1px solid rgba(61,255,160,0.35);
+  color: #bdfde0; font-size: 0.88rem; line-height: 1.5; text-align: left;
+}
+.privacy-badge .lock { font-size: 1.5rem; flex: none; }
+
+.btn {
+  display: inline-block; padding: 0.75em 1.6em; border-radius: 999px;
+  border: 2px solid var(--cyan); background: rgba(41,245,230,0.08); color: var(--cyan);
+  font-weight: 700; font-size: 1rem; letter-spacing: 0.03em; cursor: pointer;
+  transition: transform 0.12s ease, background 0.2s ease, box-shadow 0.2s ease;
+  -webkit-tap-highlight-color: transparent; user-select: none;
+}
+.btn:hover { background: rgba(41,245,230,0.18); box-shadow: 0 0 18px rgba(41,245,230,0.45); }
+.btn:active { transform: scale(0.96); }
+.btn.red { border-color: var(--red); color: var(--red); background: rgba(255,75,75,0.08); }
+.btn.red:hover { background: rgba(255,75,75,0.18); box-shadow: 0 0 18px rgba(255,75,75,0.45); }
+.btn.ghost { border-color: rgba(255,255,255,0.35); color: var(--text); background: rgba(255,255,255,0.04); }
+.btn.ghost:hover { background: rgba(255,255,255,0.1); box-shadow: none; }
+
+.quit-btn {
+  position: fixed; top: 16px; right: 16px; z-index: 50;
+  padding: 0.55em 1.2em; border-radius: 999px; border: 2px solid var(--red);
+  background: rgba(255,75,75,0.12); color: var(--red); font-weight: 800;
+  letter-spacing: 0.04em; cursor: pointer; font-size: 0.95rem;
+}
+.quit-btn:hover { background: rgba(255,75,75,0.25); box-shadow: 0 0 16px rgba(255,75,75,0.5); }
+
+.lang-toggle {
+  position: fixed; top: 16px; left: 16px; z-index: 50;
+  padding: 0.55em 1.1em; border-radius: 999px; border: 2px solid var(--cyan);
+  background: rgba(41,245,230,0.10); color: var(--cyan); font-weight: 800;
+  letter-spacing: 0.04em; cursor: pointer; font-size: 0.95rem;
+}
+.lang-toggle:hover { background: rgba(41,245,230,0.22); box-shadow: 0 0 16px rgba(41,245,230,0.5); }
+
+.home-wrap {
+  min-height: 100vh; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; padding: 5vh 5vw;
+}
+.card-row { display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center; max-width: 980px; }
+.game-card {
+  width: 320px; padding: 1.8em 1.6em 2em; border-radius: 22px;
+  background: linear-gradient(160deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
+  border: 1px solid rgba(255,255,255,0.10); cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+}
+.game-card:hover { transform: translateY(-6px); }
+.game-card.red-mode:hover { border-color: var(--red); box-shadow: 0 12px 40px rgba(255,75,75,0.18); }
+.game-card.blue-mode:hover { border-color: var(--cyan); box-shadow: 0 12px 40px rgba(41,245,230,0.18); }
+.game-card .icon { font-size: 3.4rem; margin-bottom: 0.4em; }
+.game-card.red-mode .icon { filter: drop-shadow(0 0 12px rgba(255,75,75,0.6)); }
+.game-card.blue-mode .icon { filter: drop-shadow(0 0 12px rgba(41,245,230,0.6)); }
+.game-card h2 { margin: 0 0 0.4em; font-size: 1.4rem; }
+.game-card.red-mode h2 { color: var(--red); }
+.game-card.blue-mode h2 { color: var(--cyan); }
+.game-card p { margin: 0 0 1.2em; color: var(--muted); font-size: 0.92rem; line-height: 1.5; }
+
+.cam-status { text-align: center; font-size: 0.85rem; color: var(--muted); margin: 1.6em 0 0; min-height: 1.2em; }
+.cam-status.on { color: var(--green); }
+
+.game-wrap { min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 18px 16px 40px; }
+.game-header { text-align: center; margin-bottom: 10px; }
+.game-header h1 { margin: 0; font-size: clamp(1.4rem, 4vw, 2rem); letter-spacing: 0.05em; }
+.game-header h1.red-mode { color: var(--red); text-shadow: 0 0 14px rgba(255,75,75,0.5); }
+.game-header h1.blue-mode { color: var(--cyan); text-shadow: 0 0 14px rgba(41,245,230,0.5); }
+
+.stage {
+  position: relative; width: min(92vw, 900px); aspect-ratio: 4 / 3;
+  border-radius: 20px; overflow: hidden; background: #000;
+  border: 2px solid rgba(255,255,255,0.08); box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+}
+.stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+.hud {
+  position: absolute; top: 14px; left: 14px; right: 14px;
+  display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;
+  pointer-events: none; font-weight: 800; z-index: 10;
+}
+.hud .pill {
+  background: rgba(6,8,18,0.65); border: 1px solid rgba(255,255,255,0.15);
+  padding: 0.35em 0.9em; border-radius: 999px; font-size: 0.95rem; backdrop-filter: blur(3px);
+  white-space: nowrap;
+}
+.hud .pill.lock { font-size: 0.8rem; color: var(--green); border-color: rgba(61,255,160,0.4); }
+
+.safety-banner {
+  position: absolute; left: 50%; top: 14px; transform: translateX(-50%);
+  z-index: 30; display: flex; align-items: center; gap: 0.6em;
+  padding: 0.6em 1.1em; border-radius: 14px;
+  background: rgba(30,10,0,0.78); border: 2px solid var(--orange);
+  color: #ffe2c2; font-weight: 700; font-size: 0.95rem;
+  max-width: 88%; text-align: center;
+  animation: pulse-warn 1.1s ease-in-out infinite;
+  box-shadow: 0 0 24px rgba(255,154,60,0.4);
+}
+.safety-banner .icon { font-size: 1.3rem; }
+@keyframes pulse-warn {
+  0%, 100% { box-shadow: 0 0 14px rgba(255,154,60,0.35); }
+  50% { box-shadow: 0 0 30px rgba(255,154,60,0.75); }
+}
+
+.center-msg {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 0.6em; z-index: 20; text-align: center; padding: 20px; pointer-events: none;
+}
+.center-msg .big { font-size: clamp(3rem, 12vw, 6rem); font-weight: 900; text-shadow: 0 0 20px rgba(0,0,0,0.8); }
+.center-msg .label { font-size: clamp(1.1rem, 3vw, 1.6rem); font-weight: 700; background: rgba(6,8,18,0.6); padding: 0.3em 0.8em; border-radius: 14px; }
+.center-msg .sub { font-size: 0.95rem; color: var(--muted); max-width: 420px; }
+.center-msg .actions { pointer-events: all; display: flex; gap: 0.8em; margin-top: 0.6em; flex-wrap: wrap; justify-content: center; }
+
+.overlay-note { margin-top: 14px; color: var(--muted); font-size: 0.85rem; text-align: center; max-width: 640px; }
+
+#replayVideo {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  z-index: 40; background: #000; object-fit: contain;
+}
+#replayCloseBtn {
+  position: absolute; top: 14px; right: 14px; z-index: 41;
+  padding: 0.4em 0.9em; font-size: 0.85rem;
+}
+
+.loading-dots::after { content: ''; animation: dots 1.2s steps(4, end) infinite; }
+@keyframes dots { 0% { content: ''; } 25% { content: '.'; } 50% { content: '..'; } 75% { content: '...'; } 100% { content: ''; } }
+
+.hidden { display: none !important; }
+
+@media (max-width: 480px) {
+  .quit-btn { top: 10px; right: 10px; padding: 0.45em 0.9em; font-size: 0.85rem; }
+  .lang-toggle { top: 10px; left: 10px; padding: 0.45em 0.9em; font-size: 0.85rem; }
+  .safety-banner { font-size: 0.82rem; padding: 0.5em 0.8em; }
+}
+</style>
+</head>
+<body>
+
+  <button class="quit-btn hidden" id="quitBtn">✕ Quitter</button>
+  <button class="lang-toggle" id="langToggle" type="button">EN</button>
+
+  <!-- ===== TITLE SCREEN ===== -->
+  <div class="home-wrap" id="titleScreen">
+    <h1 class="neon-title">REFLEX</h1>
+    <p class="subtitle" id="subtitleText">Deux jeux de réflexes qui utilisent ta caméra. Choisis ton cercle.</p>
+
+    <div class="privacy-badge">
+      <span class="lock">🔒</span>
+      <span>
+        <strong id="privacyStrong">C'est sans danger :</strong>
+        <span id="privacyText"> ta caméra est analysée en direct,
+        entièrement dans ton navigateur. Aucune image ni vidéo n'est jamais
+        envoyée, enregistrée, ni partagée où que ce soit.</span>
+      </span>
+    </div>
+
+    <div class="card-row">
+      <button class="game-card red-mode" id="cardRed" type="button">
+        <div class="icon">🔴</div>
+        <h2 id="redCardTitle">Cercle Rouge</h2>
+        <p id="redCardDesc">
+          Un cercle rouge apparaît avec un compte à rebours. Ne le touche
+          avec aucune partie de ton corps avant la fin du temps ! Tiens
+          bon jusqu'à la manche 10, ça devient de plus en plus dur.
+        </p>
+        <span class="btn red" id="redCardBtn">Jouer</span>
+      </button>
+
+      <button class="game-card blue-mode" id="cardBlue" type="button">
+        <div class="icon">🔵</div>
+        <h2 id="blueCardTitle">Cercle Bleu</h2>
+        <p id="blueCardDesc">
+          Un cercle bleu apparaît avec un compte à rebours. Touche-le avec
+          n'importe quelle partie de ton corps avant la fin du temps !
+          Survis jusqu'à la manche 10.
+        </p>
+        <span class="btn" id="blueCardBtn">Jouer</span>
+      </button>
+    </div>
+
+    <p class="cam-status" id="camStatus"></p>
+  </div>
+
+  <!-- ===== GAME SCREEN (shared) ===== -->
+  <div class="game-wrap hidden" id="gameScreen">
+    <div class="game-header">
+      <h1 id="gameTitle">REFLEX</h1>
+    </div>
+
+    <div class="stage">
+      <canvas id="canvas"></canvas>
+
+      <div class="hud">
+        <div class="pill" id="roundPill">Manche 1 / 10</div>
+        <div class="pill lock">🔒 Privé</div>
+        <div class="pill" id="timerPill">⏱ --</div>
+      </div>
+
+      <div class="safety-banner hidden" id="safetyBanner">
+        <span class="icon">📷</span>
+        <span id="safetyText">Recule-toi : montre tout ton corps à la caméra pour continuer</span>
+      </div>
+
+      <div class="center-msg" id="centerMsg"></div>
+
+      <video id="replayVideo" class="hidden" playsinline controls></video>
+      <button class="btn ghost hidden" id="replayCloseBtn" type="button">✕</button>
+
+      <video id="video" autoplay playsinline muted style="display:none"></video>
+    </div>
+
+    <p class="overlay-note" id="overlayNote"></p>
+  </div>
+
+  <script type="module">
+  import {
+    PoseLandmarker,
+    FilesetResolver,
+  } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14";
+
+  // ===================== Pose tracking engine =====================
+  const WASM_BASE = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm";
+  const MODEL_URL = "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task";
+
+  // Landmarks we check to see if the whole body is shown: nose, both
+  // shoulders, both wrists, both hips, both ankles. Used only by Cercle
+  // Bleu (Cercle Rouge never pauses). We require a MAJORITY of these
+  // rather than all of them, so going down to the floor to reach a low
+  // blue circle doesn't itself trigger a false "too close" pause — only
+  // being genuinely cropped/too close (most points missing) does.
+  const FULL_BODY_INDICES = [0, 11, 12, 15, 16, 23, 24, 27, 28];
+  const FULL_BODY_MIN_COUNT = 6; // out of 9
+
+  class PoseEngine {
+    constructor() {
+      this.video = null;
+      this.stream = null;
+      this.landmarker = null;
+      this.lastLandmarks = null;
+      this.ready = false;
+    }
+    async init(videoEl) {
+      this.video = videoEl;
+      try {
+        this.stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 960 } },
+          audio: false,
+        });
+      } catch (err) {
+        throw new Error("CAMERA_ACCESS");
+      }
+      this.video.srcObject = this.stream;
+      await this.video.play();
+      await new Promise((resolve) => {
+        if (this.video.readyState >= 2) return resolve();
+        this.video.onloadeddata = () => resolve();
+      });
+      try {
+        const vision = await FilesetResolver.forVisionTasks(WASM_BASE);
+        try {
+          this.landmarker = await PoseLandmarker.createFromOptions(vision, {
+            baseOptions: { modelAssetPath: MODEL_URL, delegate: "GPU" },
+            runningMode: "VIDEO",
+            numPoses: 1,
+          });
+        } catch (gpuErr) {
+          this.landmarker = await PoseLandmarker.createFromOptions(vision, {
+            baseOptions: { modelAssetPath: MODEL_URL, delegate: "CPU" },
+            runningMode: "VIDEO",
+            numPoses: 1,
+          });
+        }
+      } catch (err) {
+        throw new Error("MODEL_LOAD");
+      }
+      this.ready = true;
+    }
+    detect(nowMs) {
+      if (!this.ready || !this.landmarker || this.video.readyState < 2) return null;
+      const result = this.landmarker.detectForVideo(this.video, nowMs);
+      this.lastLandmarks = (result && result.landmarks && result.landmarks.length > 0) ? result.landmarks[0] : null;
+      return this.lastLandmarks;
+    }
+    getCanvasPoints(canvasWidth, canvasHeight, minVisibility = 0.4) {
+      if (!this.lastLandmarks) return [];
+      const pts = [];
+      for (const lm of this.lastLandmarks) {
+        const vis = lm.visibility === undefined ? 1 : lm.visibility;
+        if (vis < minVisibility) continue;
+        pts.push({ x: (1 - lm.x) * canvasWidth, y: lm.y * canvasHeight });
+      }
+      return pts;
+    }
+    getBodyCenter(canvasWidth, canvasHeight, minVisibility = 0.4) {
+      const pts = this.getCanvasPoints(canvasWidth, canvasHeight, minVisibility);
+      if (pts.length === 0) return null;
+      let sx = 0, sy = 0;
+      for (const p of pts) { sx += p.x; sy += p.y; }
+      return { x: sx / pts.length, y: sy / pts.length };
+    }
+    /** True if most of the head/shoulders/wrists/hips/ankles are visible
+     * and not clipped at the frame edge. A majority (not all 9) so lying
+     * on the floor to reach a low target doesn't falsely read as "too
+     * close" — but being genuinely cropped in close still fails this. */
+    isFullBodyVisible(minVisibility = 0.5, edgeMargin = 0.03) {
+      if (!this.lastLandmarks) return false;
+      let okCount = 0;
+      for (const idx of FULL_BODY_INDICES) {
+        const lm = this.lastLandmarks[idx];
+        if (!lm) continue;
+        const vis = lm.visibility === undefined ? 1 : lm.visibility;
+        if (vis < minVisibility) continue;
+        if (lm.x < edgeMargin || lm.x > 1 - edgeMargin) continue;
+        if (lm.y < edgeMargin || lm.y > 1 - edgeMargin) continue;
+        okCount++;
+      }
+      return okCount >= FULL_BODY_MIN_COUNT;
+    }
+    stop() {
+      if (this.stream) { this.stream.getTracks().forEach((t) => t.stop()); this.stream = null; }
+      if (this.landmarker) { try { this.landmarker.close(); } catch (e) {} this.landmarker = null; }
+      this.ready = false;
+    }
+  }
+
+  function anyPointInCircle(points, cx, cy, radius) {
+    const r2 = radius * radius;
+    for (const p of points) {
+      const dx = p.x - cx, dy = p.y - cy;
+      if (dx * dx + dy * dy <= r2) return true;
+    }
+    return false;
+  }
+  function rand(min, max) { return min + Math.random() * (max - min); }
+  function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+  // ===================== Game config (two separate games) =====================
+  const TOTAL_ROUNDS = 10;
+  const INTRO_MS = 3000;
+  const GO_FLASH_MS = 500;
+  const SUCCESS_PAUSE_MS = 750;
+  const BODY_STABLE_MS = 400; // how long the whole body must stay visible before we (re)start the timer
+  const SMALL_CIRCLE_FRAC = 0.55; // small circles are this fraction of the main circle's radius
+
+  const CONFIGS = {
+    red: {
+      onTouch: "lose",
+      difficulty(r) {
+        return {
+          durationMs: clamp(3200 - (r - 1) * 180, 1300, 3200),
+          radiusFrac: 0.10 + (r - 1) * 0.01,
+          moving: r >= 6,
+          speed: r >= 6 ? 55 + (r - 6) * 18 : 0,
+          bias: 0.95, // spot the player and drop the circle right on them, every round
+          biasDir: "toward",
+          fairnessClearance: false,
+          extraCircles: clamp(r - 5, 0, 4), // small extra circles from manche 6 onward
+        };
+      },
+    },
+    blue: {
+      onTouch: "win-round",
+      difficulty(r) {
+        return {
+          durationMs: clamp(2600 - (r - 1) * 200, 900, 2600),
+          radiusFrac: clamp(0.13 - (r - 1) * 0.008, 0.05, 0.13),
+          moving: true, // moves from round 1, no warm-up
+          speed: 75 + (r - 1) * 14,
+          bias: 0.97, // spot the player and place the circle as far away as possible, every round
+          biasDir: "away",
+          fairnessClearance: false,
+        };
+      },
+    },
+  };
+
+  // ===================== i18n =====================
+  const STRINGS = {
+    fr: {
+      subtitle: "Deux jeux de réflexes qui utilisent ta caméra. Choisis ton cercle.",
+      privacyStrong: "C'est sans danger :",
+      privacyText: " ta caméra est analysée en direct, entièrement dans ton navigateur. Aucune image ni vidéo n'est jamais envoyée, enregistrée, ni partagée où que ce soit.",
+      redCardTitle: "Cercle Rouge",
+      redCardDesc: "Un cercle rouge apparaît avec un compte à rebours. Ne le touche avec aucune partie de ton corps avant la fin du temps ! Tiens bon jusqu'à la manche 10, ça devient de plus en plus dur.",
+      blueCardTitle: "Cercle Bleu",
+      blueCardDesc: "Un cercle bleu apparaît avec un compte à rebours. Touche-le avec n'importe quelle partie de ton corps avant la fin du temps ! Survis jusqu'à la manche 10.",
+      play: "Jouer",
+      quit: "✕ Quitter",
+      langToggle: "EN",
+      camOn: "🟢 Caméra active — traitement local uniquement",
+      loadingCam: "Chargement de la caméra",
+      backBtn: "Retour",
+      roundLabel: (r, total) => `Manche ${r} / ${total}`,
+      positioningLabel: "📷 Place-toi devant la caméra",
+      positioningSub: "Recule-toi jusqu'à ce que tout ton corps (tête et pieds) soit visible.",
+      prepare: "Prépare-toi...",
+      go: "GO !",
+      paused: "En pause...",
+      roundSuccessBlue: (r) => `💧 Manche ${r} réussie !`,
+      roundSuccessRed: (r) => `✔ Manche ${r} passée !`,
+      lostBig: "PERDU",
+      lostSubBlue: "Tu n'as pas atteint le cercle bleu à temps.",
+      lostSubRed: "Le scan t'a surpris dans un cercle rouge pile quand le temps est tombé à zéro.",
+      wonBig: "GAGNÉ !",
+      wonLabel: "10 manches survécues 🎉",
+      retry: "Rejouer",
+      continueBtn: "Continuer",
+      watchReplay: "▶ Revoir la manche",
+      home: "Accueil",
+      safetyNoBody: "Placement caméra : montre-toi entièrement à la caméra pour continuer",
+      safetyPartial: "Recule-toi : montre tout ton corps (tête + pieds) à la caméra pour continuer",
+      redGameTitle: "🔴 Cercle Rouge",
+      redNote: "Le cercle apparaît directement sur toi — au moment exact où son compte à rebours atteint zéro, un scan vérifie si tu es toujours dedans. Bouge avant la fin ! À partir de la manche 6, des petits cercles supplémentaires apparaissent aussi. Ce jeu ne se met jamais en pause, même si tu sors du cadre.",
+      blueGameTitle: "🔵 Cercle Bleu",
+      blueNote: "Le cercle apparaît loin de toi et se déplace dès la première manche — cours le toucher avec n'importe quelle partie de ton corps avant la fin du compte à rebours. Il rétrécit, va de plus en plus vite, et le temps se réduit à chaque manche.",
+      camAccessError: "Impossible d'accéder à la caméra. Vérifie que tu as autorisé l'accès à la webcam pour cette page.",
+      modelLoadError: "Impossible de charger le modèle de détection (connexion internet requise au premier lancement).",
+    },
+    en: {
+      subtitle: "Two reflex games that use your camera. Pick your circle.",
+      privacyStrong: "It's safe:",
+      privacyText: " your camera is analyzed live, entirely inside your browser. No image or video is ever sent, saved, or shared anywhere.",
+      redCardTitle: "Red Circle",
+      redCardDesc: "A red circle appears with a countdown. Don't let any part of your body touch it before time runs out! Hold on through round 10 — it gets harder and harder.",
+      blueCardTitle: "Blue Circle",
+      blueCardDesc: "A blue circle appears with a countdown. Touch it with any part of your body before time runs out! Survive through round 10.",
+      play: "Play",
+      quit: "✕ Quit",
+      langToggle: "FR",
+      camOn: "🟢 Camera active — local processing only",
+      loadingCam: "Loading camera",
+      backBtn: "Back",
+      roundLabel: (r, total) => `Round ${r} / ${total}`,
+      positioningLabel: "📷 Stand in front of the camera",
+      positioningSub: "Step back until your whole body (head and feet) is visible.",
+      prepare: "Get ready...",
+      go: "GO!",
+      paused: "Paused...",
+      roundSuccessBlue: (r) => `💧 Round ${r} cleared!`,
+      roundSuccessRed: (r) => `✔ Round ${r} passed!`,
+      lostBig: "LOST",
+      lostSubBlue: "You didn't reach the blue circle in time.",
+      lostSubRed: "The scan caught you inside a red circle right as time hit zero.",
+      wonBig: "WON!",
+      wonLabel: "Survived 10 rounds 🎉",
+      retry: "Replay",
+      continueBtn: "Continue",
+      watchReplay: "▶ Watch replay",
+      home: "Home",
+      safetyNoBody: "Camera framing: show your whole body to the camera to continue",
+      safetyPartial: "Step back: show your whole body (head + feet) to the camera to continue",
+      redGameTitle: "🔴 Red Circle",
+      redNote: "The circle appears right on top of you — the instant its countdown hits zero, a scan checks whether you're still inside it. Move before time's up! From round 6 onward, extra small circles appear too. This game never pauses, even if you step out of frame.",
+      blueGameTitle: "🔵 Blue Circle",
+      blueNote: "The circle appears far from you and moves from round one — run and touch it with any part of your body before the countdown ends. It shrinks, speeds up, and the time shortens each round.",
+      camAccessError: "Couldn't access the camera. Make sure you've allowed webcam access for this page.",
+      modelLoadError: "Couldn't load the detection model (an internet connection is required on first launch).",
+    },
+  };
+  let LANG = "fr";
+  function t() { return STRINGS[LANG]; }
+
+  // ===================== DOM refs =====================
+  const video = document.getElementById("video");
+  const canvas = document.getElementById("canvas");
+  const ctx = canvas.getContext("2d");
+  const centerMsg = document.getElementById("centerMsg");
+  const roundPill = document.getElementById("roundPill");
+  const timerPill = document.getElementById("timerPill");
+  const quitBtn = document.getElementById("quitBtn");
+  const titleScreen = document.getElementById("titleScreen");
+  const gameScreen = document.getElementById("gameScreen");
+  const gameTitle = document.getElementById("gameTitle");
+  const overlayNote = document.getElementById("overlayNote");
+  const camStatus = document.getElementById("camStatus");
+  const cardRed = document.getElementById("cardRed");
+  const cardBlue = document.getElementById("cardBlue");
+  const safetyBanner = document.getElementById("safetyBanner");
+  const safetyText = document.getElementById("safetyText");
+  const langToggle = document.getElementById("langToggle");
+  const subtitleText = document.getElementById("subtitleText");
+  const privacyStrong = document.getElementById("privacyStrong");
+  const privacyText = document.getElementById("privacyText");
+  const redCardTitle = document.getElementById("redCardTitle");
+  const redCardDesc = document.getElementById("redCardDesc");
+  const redCardBtn = document.getElementById("redCardBtn");
+  const blueCardTitle = document.getElementById("blueCardTitle");
+  const blueCardDesc = document.getElementById("blueCardDesc");
+  const blueCardBtn = document.getElementById("blueCardBtn");
+  const replayVideo = document.getElementById("replayVideo");
+  const replayCloseBtn = document.getElementById("replayCloseBtn");
+
+  const engine = new PoseEngine();
+
+  // ===================== Round replay recording =====================
+  // Records the canvas (video + shapes) for the round currently in play, so
+  // the player can watch back exactly how they won or lost it. Only the
+  // most recently finished round's recording is kept.
+  const recordingSupported = typeof MediaRecorder !== "undefined" && typeof canvas.captureStream === "function";
+  let mediaRecorder = null;
+  let recordedChunks = [];
+  let lastReplayUrl = null;
+
+  function pickReplayMimeType() {
+    const candidates = ["video/webm;codecs=vp9", "video/webm;codecs=vp8", "video/webm"];
+    for (const c of candidates) {
+      if (MediaRecorder.isTypeSupported(c)) return c;
+    }
+    return "";
+  }
+
+  function startRoundRecording() {
+    if (!recordingSupported) return;
+    try {
+      const stream = canvas.captureStream(30);
+      const mimeType = pickReplayMimeType();
+      mediaRecorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+      recordedChunks = [];
+      mediaRecorder.ondataavailable = (e) => { if (e.data && e.data.size > 0) recordedChunks.push(e.data); };
+      mediaRecorder.start();
+    } catch (err) {
+      mediaRecorder = null;
+    }
+  }
+
+  function stopRoundRecording() {
+    return new Promise((resolve) => {
+      if (!recordingSupported || !mediaRecorder || mediaRecorder.state === "inactive") { resolve(); return; }
+      mediaRecorder.addEventListener("stop", () => {
+        if (recordedChunks.length > 0) {
+          const blob = new Blob(recordedChunks, { type: mediaRecorder.mimeType || "video/webm" });
+          if (lastReplayUrl) URL.revokeObjectURL(lastReplayUrl);
+          lastReplayUrl = URL.createObjectURL(blob);
+        }
+        resolve();
+      }, { once: true });
+      try { mediaRecorder.stop(); } catch (err) { resolve(); }
+    });
+  }
+
+  function discardReplay() {
+    if (mediaRecorder && mediaRecorder.state !== "inactive") { try { mediaRecorder.stop(); } catch (err) {} }
+    if (lastReplayUrl) { URL.revokeObjectURL(lastReplayUrl); lastReplayUrl = null; }
+    closeReplay();
+  }
+
+  function openReplay() {
+    if (!lastReplayUrl) return;
+    replayVideo.src = lastReplayUrl;
+    replayVideo.classList.remove("hidden");
+    replayCloseBtn.classList.remove("hidden");
+    replayVideo.currentTime = 0;
+    replayVideo.play().catch(() => {});
+  }
+
+  function closeReplay() {
+    replayVideo.pause();
+    replayVideo.removeAttribute("src");
+    replayVideo.load();
+    replayVideo.classList.add("hidden");
+    replayCloseBtn.classList.add("hidden");
+  }
+
+  replayCloseBtn.addEventListener("click", closeReplay);
+
+  let currentMode = null; // 'red' | 'blue'
+  // title | loading | positioning | intro | go | active | success | lost | won
+  let phase = "title";
+  let round = 1;
+  let pendingStartRound = 1; // which round to start once intro/positioning finishes (supports "replay last round")
+  let shape = null;
+  let extraShapes = []; // small extra red circles from manche 6 onward (Cercle Rouge only)
+  let roundStartTime = 0;
+  let roundDurationMs = 0;
+  let introStartTime = 0;
+  let pauseStartTime = 0;
+  let rafId = null;
+  let lastFrameTs = null;
+  let bodyOkStreakStart = null;
+  let isSafetyPaused = false;
+
+  function setCenterMsg(html) { centerMsg.innerHTML = html; }
+  function clearCenterMsg() { centerMsg.innerHTML = ""; }
+  function cfg() { return CONFIGS[currentMode]; }
+
+  function applyStaticTexts() {
+    subtitleText.textContent = t().subtitle;
+    privacyStrong.textContent = t().privacyStrong;
+    privacyText.textContent = t().privacyText;
+    redCardTitle.textContent = t().redCardTitle;
+    redCardDesc.textContent = t().redCardDesc;
+    redCardBtn.textContent = t().play;
+    blueCardTitle.textContent = t().blueCardTitle;
+    blueCardDesc.textContent = t().blueCardDesc;
+    blueCardBtn.textContent = t().play;
+    quitBtn.textContent = t().quit;
+    langToggle.textContent = t().langToggle;
+    if (engine.ready) camStatus.textContent = t().camOn;
+  }
+
+  cardRed.addEventListener("click", () => startGame("red"));
+  cardBlue.addEventListener("click", () => startGame("blue"));
+  quitBtn.addEventListener("click", goToTitle);
+  langToggle.addEventListener("click", () => {
+    LANG = LANG === "fr" ? "en" : "fr";
+    applyStaticTexts();
+  });
+  window.addEventListener("beforeunload", () => engine.stop());
+  applyStaticTexts();
+
+  async function ensureEngineReady() {
+    if (engine.ready) return true;
+    setCenterMsg(`<div class="label">${t().loadingCam}<span class="loading-dots"></span></div>`);
+    try {
+      await engine.init(video);
+    } catch (err) {
+      const msg = err.message === "CAMERA_ACCESS" ? t().camAccessError
+        : err.message === "MODEL_LOAD" ? t().modelLoadError
+        : err.message;
+      setCenterMsg(`
+        <div class="label" style="color:#ff4b4b;">😕 ${msg}</div>
+        <div class="actions"><button class="btn ghost" id="backBtn">${t().backBtn}</button></div>
+      `);
+      document.getElementById("backBtn").addEventListener("click", goToTitle);
+      return false;
+    }
+    canvas.width = video.videoWidth || 1280;
+    canvas.height = video.videoHeight || 960;
+    camStatus.textContent = t().camOn;
+    camStatus.classList.add("on");
+    return true;
+  }
+
+  async function startGame(mode) {
+    currentMode = mode;
+    titleScreen.classList.add("hidden");
+    gameScreen.classList.remove("hidden");
+    quitBtn.classList.remove("hidden");
+    langToggle.classList.add("hidden");
+    gameTitle.textContent = mode === "red" ? t().redGameTitle : t().blueGameTitle;
+    gameTitle.className = mode === "red" ? "red-mode" : "blue-mode";
+    overlayNote.textContent = mode === "red" ? t().redNote : t().blueNote;
+    pendingStartRound = 1;
+    roundPill.textContent = t().roundLabel(pendingStartRound, TOTAL_ROUNDS);
+    timerPill.textContent = "⏱ --";
+    phase = "loading";
+
+    const ok = await ensureEngineReady();
+    if (!ok || currentMode !== mode) return;
+    if (gameScreen.classList.contains("hidden")) return; // user quit while loading
+
+    round = 1;
+    bodyOkStreakStart = null;
+    lastFrameTs = null;
+    isSafetyPaused = false;
+    beginRun();
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(frame);
+  }
+
+  // Cercle Rouge never pauses/waits on camera framing — it starts and runs
+  // straight through no matter what. Cercle Bleu still waits for (and can
+  // pause on) the whole body being visible, since it's checked continuously.
+  function beginRun() {
+    if (currentMode === "red") startIntro();
+    else startPositioning();
+  }
+
+  function goToTitle() {
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = null;
+    currentMode = null;
+    phase = "title";
+    gameScreen.classList.add("hidden");
+    titleScreen.classList.remove("hidden");
+    quitBtn.classList.add("hidden");
+    langToggle.classList.remove("hidden");
+    safetyBanner.classList.add("hidden");
+    clearCenterMsg();
+    discardReplay();
+  }
+
+  function startPositioning() {
+    phase = "positioning";
+    bodyOkStreakStart = null;
+    setCenterMsg(`
+      <div class="label">${t().positioningLabel}</div>
+      <div class="sub">${t().positioningSub}</div>
+    `);
+  }
+
+  function startIntro() {
+    phase = "intro";
+    introStartTime = performance.now();
+    clearCenterMsg();
+  }
+
+  function placeShape(round) {
+    const d = cfg().difficulty(round);
+    const W = canvas.width, H = canvas.height;
+    const minDim = Math.min(W, H);
+    const radius = d.radiusFrac * minDim;
+    const margin = radius + 12;
+
+    let x = rand(margin, Math.max(margin, W - margin));
+    let y = rand(margin, Math.max(margin, H - margin));
+
+    const bodyCenter = engine.getBodyCenter(W, H);
+    if (bodyCenter && d.bias > 0) {
+      if (d.biasDir === "toward") {
+        const bx = clamp(bodyCenter.x, margin, Math.max(margin, W - margin));
+        const by = clamp(bodyCenter.y, margin, Math.max(margin, H - margin));
+        x = x + (bx - x) * d.bias;
+        y = y + (by - y) * d.bias;
+      } else {
+        const desiredMinDist = d.bias * (minDim * 0.7);
+        const dx = x - bodyCenter.x, dy = y - bodyCenter.y;
+        const dist = Math.hypot(dx, dy);
+        if (dist < desiredMinDist) {
+          const angle = dist < 1 ? rand(0, Math.PI * 2) : Math.atan2(dy, dx);
+          x = clamp(bodyCenter.x + Math.cos(angle) * desiredMinDist, margin, Math.max(margin, W - margin));
+          y = clamp(bodyCenter.y + Math.sin(angle) * desiredMinDist, margin, Math.max(margin, H - margin));
+        }
+      }
+    }
+
+    if (d.fairnessClearance) {
+      const points = engine.getCanvasPoints(W, H);
+      const minClearance = radius + 26;
+      for (const p of points) {
+        const dx = x - p.x, dy = y - p.y;
+        const dist = Math.hypot(dx, dy);
+        if (dist < minClearance) {
+          if (dist < 1) {
+            x = clamp(x + minClearance, margin, Math.max(margin, W - margin));
+          } else {
+            const scale = minClearance / dist;
+            x = clamp(p.x + dx * scale, margin, Math.max(margin, W - margin));
+            y = clamp(p.y + dy * scale, margin, Math.max(margin, H - margin));
+          }
+        }
+      }
+    }
+
+    let vx = 0, vy = 0;
+    if (d.moving) {
+      const angle = rand(0, Math.PI * 2);
+      vx = Math.cos(angle) * d.speed;
+      vy = Math.sin(angle) * d.speed;
+    }
+
+    return { x, y, r: radius, vx, vy, margin, durationMs: d.durationMs, extraCircles: d.extraCircles || 0 };
+  }
+
+  /** Places `count` small, static, non-overlapping red circles around the
+   * main shape — the extra hazards that start appearing from manche 6. */
+  function placeSmallCircles(mainShape, count) {
+    const W = canvas.width, H = canvas.height;
+    const radius = mainShape.r * SMALL_CIRCLE_FRAC;
+    const margin = radius + 10;
+    const placed = [mainShape];
+    const result = [];
+    const bodyPoints = engine.getCanvasPoints(W, H);
+
+    for (let i = 0; i < count; i++) {
+      let best = null;
+      for (let attempt = 0; attempt < 10; attempt++) {
+        let x = rand(margin, Math.max(margin, W - margin));
+        let y = rand(margin, Math.max(margin, H - margin));
+
+        // Keep clear of wherever the player is standing right now, same as
+        // the main circle's fairness pass.
+        for (const p of bodyPoints) {
+          const dx = x - p.x, dy = y - p.y;
+          const dist = Math.hypot(dx, dy);
+          const minClearance = radius + 26;
+          if (dist < minClearance && dist >= 1) {
+            const scale = minClearance / dist;
+            x = clamp(p.x + dx * scale, margin, Math.max(margin, W - margin));
+            y = clamp(p.y + dy * scale, margin, Math.max(margin, H - margin));
+          }
+        }
+
+        const overlapsExisting = placed.some((s) => {
+          const dx = x - s.x, dy = y - s.y;
+          return Math.hypot(dx, dy) < (radius + s.r + 14);
+        });
+        if (!overlapsExisting) { best = { x, y }; break; }
+        best = { x, y }; // fall back to the last attempt if none are clean
+      }
+      const small = { x: best.x, y: best.y, r: radius, vx: 0, vy: 0, margin };
+      placed.push(small);
+      result.push(small);
+    }
+    return result;
+  }
+
+  function startRound(r) {
+    round = r;
+    shape = placeShape(r);
+    roundDurationMs = shape.durationMs;
+    roundStartTime = performance.now();
+    extraShapes = (currentMode === "red" && shape.extraCircles > 0)
+      ? placeSmallCircles(shape, shape.extraCircles)
+      : [];
+    phase = "active";
+    clearCenterMsg();
+    roundPill.textContent = t().roundLabel(r, TOTAL_ROUNDS);
+    startRoundRecording();
+  }
+
+  async function onRoundSuccess() {
+    phase = "success";
+    pauseStartTime = performance.now();
+    const label = currentMode === "blue" ? t().roundSuccessBlue(round) : t().roundSuccessRed(round);
+    setCenterMsg(`<div class="label" style="color:#29f5e6;">${label}</div>`);
+    await stopRoundRecording();
+  }
+
+  async function onLose() {
+    phase = "lost";
+    if (rafId) cancelAnimationFrame(rafId);
+    safetyBanner.classList.add("hidden");
+    await stopRoundRecording();
+    const sub = currentMode === "blue" ? t().lostSubBlue : t().lostSubRed;
+    const replayBtnHtml = lastReplayUrl ? `<button class="btn ghost" id="replayBtn">${t().watchReplay}</button>` : "";
+    setCenterMsg(`
+      <div class="big" style="color:#ff4b4b;">${t().lostBig}</div>
+      <div class="label">${t().roundLabel(round, TOTAL_ROUNDS)}</div>
+      <div class="sub">${sub}</div>
+      <div class="actions">
+        <button class="btn" id="retryBtn">${t().continueBtn}</button>
+        ${replayBtnHtml}
+      </div>
+    `);
+    wireEndButtons();
+    drawStaticLoop();
+  }
+
+  async function onWin() {
+    phase = "won";
+    if (rafId) cancelAnimationFrame(rafId);
+    safetyBanner.classList.add("hidden");
+    await stopRoundRecording();
+    const replayBtnHtml = lastReplayUrl ? `<button class="btn ghost" id="replayBtn">${t().watchReplay}</button>` : "";
+    setCenterMsg(`
+      <div class="big" style="color:#3dffa0;">${t().wonBig}</div>
+      <div class="label">${t().wonLabel}</div>
+      <div class="actions">
+        <button class="btn" id="retryBtn">${t().retry}</button>
+        ${replayBtnHtml}
+        <button class="btn ghost" id="homeBtn">${t().home}</button>
+      </div>
+    `);
+    wireEndButtons();
+    drawStaticLoop();
+  }
+
+  function wireEndButtons() {
+    const retryBtn = document.getElementById("retryBtn");
+    const replayBtn = document.getElementById("replayBtn");
+    const homeBtn = document.getElementById("homeBtn");
+    if (retryBtn) retryBtn.addEventListener("click", () => {
+      closeReplay();
+      pendingStartRound = round; // replay only the round just lost/won, not the whole run
+      timerPill.textContent = "⏱ --";
+      roundPill.textContent = t().roundLabel(pendingStartRound, TOTAL_ROUNDS);
+      bodyOkStreakStart = null;
+      lastFrameTs = null;
+      isSafetyPaused = false;
+      beginRun();
+      rafId = requestAnimationFrame(frame);
+    });
+    if (replayBtn) replayBtn.addEventListener("click", openReplay);
+    if (homeBtn) homeBtn.addEventListener("click", goToTitle);
+  }
+
+  function drawStaticLoop() {
+    function tick() {
+      drawMirroredVideo();
+      if (phase === "lost" || phase === "won") {
+        staticRafId = requestAnimationFrame(tick);
+      }
+    }
+    let staticRafId = requestAnimationFrame(tick);
+  }
+
+  function drawMirroredVideo() {
+    ctx.save();
+    ctx.translate(canvas.width, 0);
+    ctx.scale(-1, 1);
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    ctx.restore();
+  }
+
+  function drawRedShape(remainingFrac, remainingSecText) {
+    // Brief visual tension ramp in the last moments before the scan fires.
+    const urgency = remainingFrac < 0.2 ? (0.2 - remainingFrac) / 0.2 : 0;
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(shape.x, shape.y, shape.r, 0, Math.PI * 2);
+    const grad = ctx.createRadialGradient(shape.x, shape.y, shape.r * 0.2, shape.x, shape.y, shape.r);
+    grad.addColorStop(0, `rgba(255,75,75,${0.55 + urgency * 0.25})`);
+    grad.addColorStop(1, `rgba(255,75,75,${0.18 + urgency * 0.15})`);
+    ctx.fillStyle = grad;
+    ctx.fill();
+    ctx.lineWidth = 4 + urgency * 2;
+    ctx.strokeStyle = "rgba(255,75,75,0.95)";
+    ctx.shadowColor = "rgba(255,75,75,0.9)";
+    ctx.shadowBlur = 18 + urgency * 16;
+    ctx.stroke();
+    ctx.restore();
+
+    for (const es of extraShapes) drawSmallRedShape(es, urgency);
+
+    drawCountdownRing(shape, remainingFrac);
+    drawShapeLabel(shape, remainingSecText);
+  }
+
+  function drawSmallRedShape(s, urgency) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    const grad = ctx.createRadialGradient(s.x, s.y, s.r * 0.2, s.x, s.y, s.r);
+    grad.addColorStop(0, `rgba(255,75,75,${0.55 + urgency * 0.25})`);
+    grad.addColorStop(1, `rgba(255,75,75,${0.18 + urgency * 0.15})`);
+    ctx.fillStyle = grad;
+    ctx.fill();
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = "rgba(255,75,75,0.9)";
+    ctx.shadowColor = "rgba(255,75,75,0.85)";
+    ctx.shadowBlur = 10 + urgency * 10;
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawBlueShape(remainingFrac, remainingSecText) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(shape.x, shape.y, shape.r, 0, Math.PI * 2);
+    ctx.save();
+    ctx.clip();
+    ctx.clearRect(shape.x - shape.r - 2, shape.y - shape.r - 2, shape.r * 2 + 4, shape.r * 2 + 4);
+    drawMirroredVideo();
+    const grad = ctx.createRadialGradient(shape.x, shape.y, shape.r * 0.15, shape.x, shape.y, shape.r);
+    grad.addColorStop(0, "rgba(41,150,245,0.35)");
+    grad.addColorStop(1, "rgba(20,90,200,0.55)");
+    ctx.fillStyle = grad;
+    ctx.fillRect(shape.x - shape.r, shape.y - shape.r, shape.r * 2, shape.r * 2);
+    ctx.restore();
+
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = "rgba(41,245,230,0.95)";
+    ctx.shadowColor = "rgba(41,245,230,0.9)";
+    ctx.shadowBlur = 20;
+    ctx.stroke();
+    ctx.restore();
+
+    drawCountdownRing(shape, remainingFrac);
+    drawShapeLabel(shape, remainingSecText);
+  }
+
+  function drawCountdownRing(s, remainingFrac) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r + 10, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * remainingFrac);
+    ctx.strokeStyle = "#fff";
+    ctx.lineWidth = 5;
+    ctx.lineCap = "round";
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawShapeLabel(s, text) {
+    ctx.save();
+    ctx.fillStyle = "#fff";
+    ctx.font = `bold ${Math.max(20, s.r * 0.45)}px sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.shadowColor = "rgba(0,0,0,0.8)";
+    ctx.shadowBlur = 6;
+    ctx.fillText(text, s.x, s.y);
+    ctx.restore();
+  }
+
+  function updateSafetyBanner(show, noBodyAtAll) {
+    if (show) {
+      safetyText.textContent = noBodyAtAll ? t().safetyNoBody : t().safetyPartial;
+      safetyBanner.classList.remove("hidden");
+    } else {
+      safetyBanner.classList.add("hidden");
+    }
+  }
+
+  function frame(now) {
+    rafId = requestAnimationFrame(frame);
+    drawMirroredVideo();
+    engine.detect(now);
+    const points = engine.getCanvasPoints(canvas.width, canvas.height);
+
+    if (lastFrameTs === null) lastFrameTs = now;
+    const dt = Math.min(now - lastFrameTs, 100);
+    lastFrameTs = now;
+
+    const bodyOkNow = engine.isFullBodyVisible();
+    if (bodyOkNow) {
+      if (bodyOkStreakStart === null) bodyOkStreakStart = now;
+    } else {
+      bodyOkStreakStart = null;
+    }
+    const bodyStable = bodyOkNow && (now - bodyOkStreakStart >= BODY_STABLE_MS);
+
+    if (phase === "positioning") {
+      updateSafetyBanner(false, false);
+      if (bodyStable) startIntro();
+      return;
+    }
+
+    // Safety pause: Cercle Bleu only. Cercle Rouge never stops for anything,
+    // no matter what the camera sees.
+    const pausablePhase = currentMode === "blue" && (phase === "intro" || phase === "go" || phase === "active");
+    if (pausablePhase) {
+      if (!isSafetyPaused && !bodyOkNow) isSafetyPaused = true;
+      else if (isSafetyPaused && bodyStable) isSafetyPaused = false;
+    } else {
+      isSafetyPaused = false;
+    }
+    updateSafetyBanner(pausablePhase && isSafetyPaused, !engine.lastLandmarks);
+
+    if (pausablePhase && isSafetyPaused) {
+      // Freeze whichever timer is currently running by pushing its
+      // reference start time forward by the elapsed frame time, and skip
+      // all movement/collision checks until the whole body is back.
+      if (phase === "intro") introStartTime += dt;
+      else if (phase === "go") pauseStartTime += dt;
+      else if (phase === "active") roundStartTime += dt;
+
+      if (phase === "active" && shape) {
+        const remainingMs = Math.max(0, roundDurationMs - (now - roundStartTime));
+        const remainingFrac = remainingMs / roundDurationMs;
+        const secText = String(Math.max(1, Math.ceil(remainingMs / 1000)));
+        if (currentMode === "red") drawRedShape(remainingFrac, secText);
+        else drawBlueShape(remainingFrac, secText);
+      } else if (phase === "intro") {
+        const remaining = INTRO_MS - (now - introStartTime);
+        const n = Math.max(1, Math.ceil(remaining / 1000));
+        setCenterMsg(`<div class="big">${n}</div><div class="sub">${t().paused}</div>`);
+      }
+      return;
+    }
+
+    if (phase === "intro") {
+      const elapsed = now - introStartTime;
+      const remaining = INTRO_MS - elapsed;
+      if (remaining <= 0) {
+        phase = "go";
+        pauseStartTime = now;
+        setCenterMsg(`<div class="big" style="color:#3dffa0;">${t().go}</div>`);
+      } else {
+        const n = Math.max(1, Math.ceil(remaining / 1000));
+        setCenterMsg(`<div class="big">${n}</div><div class="sub">${t().prepare}</div>`);
+      }
+    } else if (phase === "go") {
+      if (now - pauseStartTime >= GO_FLASH_MS) startRound(pendingStartRound);
+    } else if (phase === "active") {
+      const W = canvas.width, H = canvas.height;
+      if (shape.vx || shape.vy) {
+        const sdt = dt / 1000;
+        shape.x += shape.vx * sdt;
+        shape.y += shape.vy * sdt;
+        const m = shape.margin;
+        if (shape.x < m) { shape.x = m; shape.vx *= -1; }
+        if (shape.x > W - m) { shape.x = W - m; shape.vx *= -1; }
+        if (shape.y < m) { shape.y = m; shape.vy *= -1; }
+        if (shape.y > H - m) { shape.y = H - m; shape.vy *= -1; }
+      }
+
+      const elapsed = now - roundStartTime;
+      const remainingMs = Math.max(0, roundDurationMs - elapsed);
+      const remainingFrac = remainingMs / roundDurationMs;
+      const secText = String(Math.max(1, Math.ceil(remainingMs / 1000)));
+      timerPill.textContent = `⏱ ${Math.ceil(remainingMs / 1000)}`;
+
+      if (currentMode === "red") {
+        // No continuous checking here on purpose: you're free to pass
+        // through the circle(s) while the countdown is running. The instant
+        // it hits zero, one single scan decides the round — were you inside
+        // any red circle at that exact millisecond or not.
+        drawRedShape(remainingFrac, secText);
+        if (remainingMs <= 0) {
+          const caught = anyPointInCircle(points, shape.x, shape.y, shape.r)
+            || extraShapes.some((s) => anyPointInCircle(points, s.x, s.y, s.r));
+          if (caught) { onLose(); return; }
+          if (round >= TOTAL_ROUNDS) { onWin(); return; }
+          onRoundSuccess();
+        }
+      } else {
+        const touching = anyPointInCircle(points, shape.x, shape.y, shape.r);
+        drawBlueShape(remainingFrac, secText);
+        if (touching) {
+          if (round >= TOTAL_ROUNDS) { onWin(); return; }
+          onRoundSuccess();
+          return;
+        }
+        if (remainingMs <= 0) { onLose(); return; }
+      }
+    } else if (phase === "success") {
+      if (now - pauseStartTime >= SUCCESS_PAUSE_MS) startRound(round + 1);
+    }
+  }
+  </script>
+</body>
+</html>
